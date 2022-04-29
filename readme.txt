@@ -13,6 +13,7 @@ Backend приложения отслеживания цен карточки т
 - djangorestframework,
 - celery,
 - django-celery-beat,
+- rabbitMQ,
 - postgresql,
 - docker, docker-compose,
 - requests,
