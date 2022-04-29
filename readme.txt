@@ -14,7 +14,9 @@ Backend приложения отслеживания цен карточки т
 - celery,
 - django-celery-beat,
 - postgresql,
-- docker, docker-compose
+- docker, docker-compose,
+- requests,
+- lxml
 
 
 Инструкции запуска приложения
