@@ -12,7 +12,7 @@ class GoodsSerializer(serializers.HyperlinkedModelSerializer):
 class TaskSerializer(serializers.HyperlinkedModelSerializer):
     goods = serializers.SlugRelatedField(
         slug_field='name', 
-        queryset=GoodsForTracking.objects.all(), 
+        queryset=GoodsForTracking.objects.all().order_by('name'),
         label='выберите наименование товара для отслеживания')
     
     def create(self, validated_data):
@@ -35,6 +35,7 @@ class TaskSerializer(serializers.HyperlinkedModelSerializer):
 
 class MyGoodsSerializer(serializers.HyperlinkedModelSerializer):
     date_field = serializers.DateTimeField(format="%Y-%m-%d %H:%M")
+
     class Meta:
         model = MyTrackedGoods
         exclude = ['user']

@@ -2,14 +2,17 @@ version: '3.4'
 
 services:
   rabbitmq:
-    image: rabbitmq:3-management	
+    image: rabbitmq:latest
+    container_name: rmq_wildberries
     networks:
       - main
-    environment:
-      - RABBIMQ_NODENAME=rabbitmq@localhost
-      - RABBITMQ_DEFAULT_USER=guest
-      - RABBITMQ_DEFAULT_PASSWORD=guest
-      - RABBITMQ_DEFAULT_VHOST=/
+#    environment:
+#      - RABBIMQ_NODENAME=rabbitmq@localhost
+#      - RABBITMQ_DEFAULT_USER=guest
+#      - RABBITMQ_DEFAULT_PASSWORD=guest
+#      - RABBITMQ_DEFAULT_VHOST=/
+    env_file:
+      - .env-non-dev
     ports:
       - "5675:5672"
       - "15675:15672"
@@ -17,10 +20,13 @@ services:
 
   postgres:
     image: postgres:latest
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=postgress
+    container_name: db_wildberries
+#    environment:
+#      - POSTGRES_USER=postgres
+#      - POSTGRES_PASSWORD=postgres
+#      - POSTGRES_DB=postgres
+    env_file:
+      - .env-non-dev
     networks:
       - main
     ports:
@@ -28,11 +34,13 @@ services:
     restart: on-failure
 
   app:
-    build: .	
+    build: .
+    env_file:
+      - .env-non-dev
     volumes:
      - .:/usr/src/app
-    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
-    container_name: app
+    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000 && pg_restore -U wildberries -Ft -d container_wildberries < wildberries_dump.sql"
+    container_name: wildberries_app
     tty: true
     depends_on:
       - rabbitmq
@@ -45,6 +53,9 @@ services:
 
   celery_worker:
     build: .
+    env_file:
+      - .env-non-dev
+    container_name: celery_wildberries
     command: sh -c "celery -A wildberies worker -l info"
     volumes:
       - .:/usr/src/app
@@ -69,6 +80,9 @@ services:
 
   celery_beat:
     build: .
+    env_file:
+      - .env-non-dev
+    container_name: beat_wildberries
     command: sh -c "celery -A wildberies beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler"
     volumes:
       - .:/usr/src/app

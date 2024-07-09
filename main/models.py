@@ -36,7 +36,7 @@ class MyTasks(models.Model):
         (3600, '1 hour'),
         (3600*12, '12 hours'),
         (3600*24, '24 hours'),
-        (30, '30 sec test'),
+        (180, '3 min test'),
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     goods = models.ForeignKey(
@@ -69,6 +69,7 @@ def task_post_save(sender, instance, signal, *args, **kwargs):
     t.last_run_at = None
     t.save()
     PeriodicTasks.changed(t)
+
 
 models.signals.post_save.connect(task_post_save, sender=MyTasks)
 
