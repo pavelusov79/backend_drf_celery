@@ -1,4 +1,6 @@
-FROM python:3.10
+FROM joyzoursky/python-chromedriver:3.9
+
+ENV DISPLAY=:99
 
 RUN mkdir /wildberries
 
