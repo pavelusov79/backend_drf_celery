@@ -17,6 +17,9 @@ class GoodsForTracking(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        ordering = ['name']
+
 
 class MyTrackedGoods(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -24,8 +27,8 @@ class MyTrackedGoods(models.Model):
         verbose_name='полное наименование товара', max_length=128)
     articul = models.PositiveIntegerField(verbose_name='артикул')
     brand_name = models.CharField(verbose_name='брэнд', max_length=32)
-    price = models.PositiveSmallIntegerField(verbose_name='цена товара')
-    discount_price = models.PositiveSmallIntegerField(
+    price = models.PositiveIntegerField(verbose_name='цена товара')
+    discount_price = models.PositiveIntegerField(
         verbose_name='цена товара со скидкой', blank=True, null=True)
     date_field = models.DateTimeField(
         default=timezone.now, verbose_name="дата время")

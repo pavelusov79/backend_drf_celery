@@ -33,6 +33,7 @@ def parse_card(art, user_id):
     driver = webdriver.Chrome(options=options)
     try:
         driver.get(url)
+        print('start parsing...')
         name = WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.XPATH, '//h1'))).text.strip()
         try:
             brand_name = WebDriverWait(driver, 15).until(EC.presence_of_element_located((
@@ -52,33 +53,18 @@ def parse_card(art, user_id):
         except Exception:
             discount_price = None
 
-        # print('name = ', name)
-        # print('brand_name = ', brand_name)
-        # print('price = ', price)
-        # print('disc_price = ', discount_price)
         user = User.objects.get(pk=int(user_id))
-        data = {}
-        if name and brand_name and price and discount_price:
-            data = {'status': 'success', 'data': {
-                'name': name,
-                'brand_name': brand_name,
-                'price': price,
-                'discount_price': discount_price
-            }}
-            g = MyTrackedGoods(brand_name=brand_name, name=name, price=price, discount_price=discount_price,
-                               articul=int(art))
-            g.user = user
-            g.save()
-        elif name and brand_name and price:
-            data = {'status': 'success', 'data': {
-                'name': name,
-                'brand_name': brand_name,
-                'price': price,
-            }}
-            g = MyTrackedGoods(brand_name=brand_name, name=name, price=price, articul=int(art))
-            g.user = user
-            g.save()
+        data = {'status': 'success', 'data': {
+            'name': name,
+            'brand_name': brand_name,
+            'price': price,
+            'discount_price': discount_price
+        }}
         print('data= ', data)
+        g = MyTrackedGoods(brand_name=brand_name, name=name, price=price, discount_price=discount_price,
+                           articul=int(art))
+        g.user = user
+        g.save()
         driver.quit()
 
     except Exception as e:

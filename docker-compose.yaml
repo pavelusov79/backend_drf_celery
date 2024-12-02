@@ -33,7 +33,7 @@ services:
     command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     container_name: app
     depends_on:
-      - rabbitmq
+      - redis
       - postgres
     ports:
       - "8000:8000"
@@ -47,20 +47,9 @@ services:
       - .env-not-dev
     command: sh -c "celery -A wildberies worker -l info"
     depends_on:
-      - rabbitmq
+      - redis
       - postgres
       - app
-    deploy:
-      replicas: 2
-      restart_policy:
-        condition: on-failure
-      resources:
-        limits:
-          cpus: '0.50'
-          memory: 50M
-        reservations:
-          cpus: '0.25'
-          memory: 20M
     restart: on-failure
     networks:
       - main
@@ -72,7 +61,7 @@ services:
     container_name: beat_wildberries
     command: sh -c "celery -A wildberies beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler"
     depends_on:
-      - rabbitmq
+      - redis
       - postgres
       - app
       - celery_worker
