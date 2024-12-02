@@ -28,7 +28,7 @@ class MyTasksViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.Dest
 
     def get_queryset(self):
         u = get_object_or_404(User, pk=self.request.user.id)
-        queryset = MyTasks.objects.filter(user=u)
+        queryset = MyTasks.objects.filter(user=u).order_by('id')
         return queryset
 
    
@@ -51,6 +51,6 @@ class MyTrackedGoodsViewSet(mixins.ListModelMixin, mixins.DestroyModelMixin, vie
     
     def get_queryset(self):
         u = get_object_or_404(User, pk=self.request.user.id)
-        queryset = MyTrackedGoods.objects.filter(user=u)
+        queryset = MyTrackedGoods.objects.filter(user=u).order_by('date_field')
         return queryset
 
