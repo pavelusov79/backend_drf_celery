@@ -4,9 +4,11 @@ RUN mkdir /wildberries
 
 WORKDIR /wildberries
 
+RUN pip install -r requirements.txt
+
 COPY . .
 
-RUN pip install -r requirements.txt
+
 
 
 

@@ -1,13 +1,10 @@
 from __future__ import absolute_import, unicode_literals
-import time
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
 
 from wildberies.celery import app
 
@@ -26,16 +23,23 @@ def parse_card(art, user_id):
     from main.models import MyTrackedGoods
 
     url = f'https://www.wildberries.ru/catalog/{art}/detail.aspx'
-    service = Service(executable_path=ChromeDriverManager().install())
     options = Options()
     options.add_argument('--headless')
     options.add_argument('--no-sandbox')
-    driver = webdriver.Chrome(options=options, service=service)
+    user_agent = 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.2 (KHTML, like Gecko) Chrome/22.0.1216.0 Safari/537.2'
+    options.add_argument('--headless')
+    options.add_argument("--window-size=1920x1080")
+    options.add_argument("--no-sandbox")
+    options.add_argument(f'user-agent={user_agent}')
+    driver = webdriver.Chrome(options=options)
     try:
         driver.get(url)
-        time.sleep(3)
-        name = driver.find_element(By.XPATH, '//h1').text.strip()
-        brand_name = driver.find_element(By.XPATH, '//a[contains(@class, "product-page__header-brand")]').text
+        name = WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.XPATH, '//h1'))).text.strip()
+        try:
+            brand_name = WebDriverWait(driver, 15).until(EC.presence_of_element_located((
+                By.XPATH, '//a[contains(@class, "product-page__header-brand")]'))).text
+        except Exception:
+            brand_name = 'No name'
         try:
             el = WebDriverWait(driver, 10).until(
                 EC.presence_of_element_located((By.XPATH, '//ins[contains(@class, "price-block__final-price")]')))
@@ -54,7 +58,7 @@ def parse_card(art, user_id):
         # print('price = ', price)
         # print('disc_price = ', discount_price)
         user = User.objects.get(pk=int(user_id))
-        # print('user =', user)
+        data = {}
         if name and brand_name and price and discount_price:
             data = {'status': 'success', 'data': {
                 'name': name,
@@ -62,7 +66,6 @@ def parse_card(art, user_id):
                 'price': price,
                 'discount_price': discount_price
             }}
-            print('data= ', data)
             g = MyTrackedGoods(brand_name=brand_name, name=name, price=price, discount_price=discount_price,
                                articul=int(art))
             g.user = user
@@ -73,20 +76,15 @@ def parse_card(art, user_id):
                 'brand_name': brand_name,
                 'price': price,
             }}
-            print('data= ', data)
             g = MyTrackedGoods(brand_name=brand_name, name=name, price=price, articul=int(art))
             g.user = user
             g.save()
-
+        print('data= ', data)
         driver.quit()
 
     except Exception as e:
         return {'status': 'error', 'details': e}
 
-
-# @app.task()
-# def add(x, y):
-#     return x + y
 
 
 
